@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# .rvmrc file for tdt application
+
+if [[ "Darwin" = "$(uname)" ]] ; then
+  rvm ruby-1.9.1@tickle --symlink textmate
+else
+  rvm ruby-1.9.1@tickle
+fi
