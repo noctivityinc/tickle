@@ -20,34 +20,140 @@ $ gem install tickle
 
 Everything's at Github - http://github.com/noctivityinc/tickle
 
+-- DEPENDENCIES
+
+chronic gem (gem install chronic)
+thoughtbot's shoulda (gem install shoulda)
+
 == USAGE
 
 You can parse strings containing a natural language interval using the Tickle.parse method.
 
+Tickle.parse returns an array of first occurrence, next occurrence, interval between occurrences.
+
+You can also pass a start date with the word "starting" (e.g. Tickle.parse('every 3 days starting next friday'))
+
+Tickle HEAVILY uses chronic for parsing both the event and the start date.
+
+-- EXAMPLES
+
   require 'rubygems'
   require 'tickle'
   
-  Time.now  #=>  2010-04-21 14:32:02 -0400
-  
-  Tickle.parse('every 2 days')
-    #=> 2010-04-23, 2
-  
-  Tickle.parse('every Sunday')  #=> note, this upcoming Sunday is 4/25/2010
-    #=> 2010-04-25, 7
-  
-  Tickle.parse('every 3 weeks')  
-    #=> 2010-05-12, 21
-  
-  Tickle.parse('2 days')
-    #=> 2010-04-23, 2
+  Time.now
+  2010-04-22 16:38:12 -0400
+
+  Tickle.parse('each day')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 1]
+
+  Tickle.parse('every day')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 1]
+
+  Tickle.parse('every week')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 7]
+
+  Tickle.parse('every Month')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 30]
+
+  Tickle.parse('every year')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 365]
+
+  Tickle.parse('daily')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 1]
+
+  Tickle.parse('weekly')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 7]
+
+  Tickle.parse('monthly')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 30]
+
+  Tickle.parse('yearly')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 365]
+
+  Tickle.parse('every 3 days')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 3]
+
+  Tickle.parse('every 3 weeks')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 21]
+
+  Tickle.parse('every 3 months')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 90]
+
+  Tickle.parse('every 3 years')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 1095]
+
+  Tickle.parse('every other day')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 2]
+
+  Tickle.parse('every other week')
+  #=> [2010-04-22 16:38:12 -0400, 2010-04-23 16:38:12 -0400, 14]
+
+  Tickle.parse('every other month')
+  #=> [2010-04-22 16:38:12 -0400, 2010-06-22 16:38:12 -0400, 60]
+
+  Tickle.parse('every other year')
+  #=> [2010-04-22 16:38:12 -0400, 2012-04-22 16:38:12 -0400, 730]
+
+  Tickle.parse('every other day starting May 1st')
+  #=> [2010-05-01 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 2]
+
+  Tickle.parse('every other week starting this Sunday')
+  #=> [2010-04-25 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 14]
+
+  Tickle.parse('every Monday')
+  #=> [2010-04-26 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 7]
+
+  Tickle.parse('every Wednesday')
+  #=> [2010-04-28 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 7]
+
+  Tickle.parse('every Friday')
+  #=> [2010-04-23 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 7]
+
+  Tickle.parse('every May')
+  #=> [2010-05-01 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 30]
+
+  Tickle.parse('every june')
+  #=> [2010-06-01 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 30]
+
+  Tickle.parse('beginning of the week')
+  #=> [2010-04-25 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 7]
+
+  Tickle.parse('middle of the week')
+  #=> [2010-04-28 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 7]
+
+  Tickle.parse('end of the week')
+  #=> [2010-04-24 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 7]
+
+  Tickle.parse('beginning of the month')
+  #=> [2010-05-01 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 30]
+
+  Tickle.parse('middle of the month')
+  #=> [2010-05-15 12:00:00 -0400, 2012-04-22 16:38:12 -0400, 30]
+
+  Tickle.parse('end of the month')
+  #=> [2010-04-30 00:00:00 -0400, 2012-04-22 16:38:12 -0400, 30]
+
+  Tickle.parse('beginning of the year')
+  #=> [2011-01-01 12:00:00 -0500, 2012-04-22 16:38:12 -0400, 365]
+
+  Tickle.parse('middle of the year')
+  #=> [2010-06-15 00:00:00 -0400, 2012-04-22 16:38:12 -0400, 365]
+
+  Tickle.parse('end of the year')
+  #=> [2010-12-31 00:00:00 -0500, 2012-04-22 16:38:12 -0400, 365]
     
     
-You can either pass a string prefixed with the word "every" or simply the time frame.  
+You can either pass a string prefixed with the word "every, each or 'on the'" or simply the time frame.  
 
 -- LIMITATIONS
 
-Currently, Tickle only works for day intervals but feel free to fork and add time-based interval support.  Also, numbers must be entered in numeric and not string form (i.e. 3 not three).
+Currently, Tickle only works for day intervals but feel free to fork and add time-based interval support or send me a note if you really want me to add it.
 
+== CREDIT
+
+HUGE shout-out to both the creator of Chronic, Tom Preston-Werner (http://chronic.rubyforge.org/) as well as Brian Brownling who maintains a github version at http://github.com/mojombo/chronic.
+
+Without their work and code structure I'd be lost.
 
 
 == Note on Patches/Pull Requests

@@ -1,0 +1,12 @@
+every 2 weeks => word 'week' found plus a number so the interval = number * 7 and start_date = today
+every second tuesday =>  => day of week found WITH number (ordinal converted to 2).  interval = 30 with start_date = Chronic.parse(Ordinal Number Day Of Week 'in' Start Date Month)
+every sunday => day of week found without number.  interval = 7, start_date = next day of week occurrence
+every other day => word 'day' found with word 'other.'  interval = 2, start_date = today
+every fourth thursday => day of week found WITH number (ordinal converted to 4).  interval = 30 with start_date = next occurrence of 'event' as parsed by chronic
+on the 15th of each month => 'each month' becomes interval = 30, number found + start month through chronic equals start date
+on the 15th of November => month found with number.  interval = 365, start_date = Chronic.parse(month + number)
+on the second monday in April => month, day and number found.  interval = 365, start_date = Chronic.parse(ordinal number form of number, day of week, month)
+every November 15th => month found with number.  interval = 365, start_date = Chronic.parse(month + number)
+every day => word 'day' found without a number.  interval = 1.  start_day = today
+every week => word 'week' found without a number.  interval = 7.  start_day = today
+every month => word 'month' found without a number.  interval = 30.  start_day = today
