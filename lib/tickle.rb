@@ -9,6 +9,7 @@
 $:.unshift File.dirname(__FILE__)     # For use/testing when no gem is installed
 
 require 'date'
+require 'time'
 require 'chronic'
 
 require 'tickle/tickle'
@@ -16,9 +17,9 @@ require 'tickle/handler'
 require 'tickle/repeater'
 
 module Tickle
-  VERSION = "0.0.1"
+  VERSION = "0.0.2"
   
-  def self.debug; true; end
+  def self.debug; false; end
   
   def self.dwrite(msg)
     puts msg if Tickle.debug

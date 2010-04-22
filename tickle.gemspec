@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Joshua Lippiner"]
-  s.date = %q{2010-04-21}
+  s.date = %q{2010-04-22}
   s.description = %q{Tickle is a date/time helper gem to help parse natural language into a recurring pattern.  Tickle is designed to be a compliment of Chronic and can interpret things such as "every 2 days, every Sunday, Sundays, Weekly, etc.}
   s.email = %q{jlippiner@noctivity.com}
   s.extra_rdoc_files = [
@@ -23,12 +23,20 @@ Gem::Specification.new do |s|
      "LICENSE",
      "README.rdoc",
      "Rakefile",
+     "SCENARIOS.rdoc",
      "VERSION",
      "lib/numerizer/numerizer.rb",
      "lib/tickle.rb",
+     "lib/tickle/handler.rb",
+     "lib/tickle/repeater.rb",
      "lib/tickle/tickle.rb",
      "test/helper.rb",
-     "test/test_tickle.rb"
+     "test/suite.rb",
+     "test/test_Time.rb",
+     "test/test_Token.rb",
+     "test/test_parsing.rb",
+     "test/test_tickle.rb",
+     "tickle.gemspec"
   ]
   s.homepage = %q{http://github.com/noctivityinc/tickle}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -37,7 +45,11 @@ Gem::Specification.new do |s|
   s.summary = %q{natural language parser for recurring events}
   s.test_files = [
     "test/helper.rb",
-     "test/test_tickle.rb"
+     "test/suite.rb",
+     "test/test_parsing.rb",
+     "test/test_tickle.rb",
+     "test/test_Time.rb",
+     "test/test_Token.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -46,14 +58,14 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<chronic>, [">= 0.2.3"])
-      s.add_development_dependency(%q<thoughtbot-shoulda>, [">= 0"])
+      s.add_development_dependency(%q<shoulda>, [">= 2.10.3"])
     else
       s.add_dependency(%q<chronic>, [">= 0.2.3"])
-      s.add_dependency(%q<thoughtbot-shoulda>, [">= 0"])
+      s.add_dependency(%q<shoulda>, [">= 2.10.3"])
     end
   else
     s.add_dependency(%q<chronic>, [">= 0.2.3"])
-    s.add_dependency(%q<thoughtbot-shoulda>, [">= 0"])
+    s.add_dependency(%q<shoulda>, [">= 2.10.3"])
   end
 end
 
