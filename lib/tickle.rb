@@ -17,7 +17,7 @@ require 'tickle/handler'
 require 'tickle/repeater'
 
 module Tickle
-  VERSION = "0.0.2"
+  VERSION = "0.0.3"
   
   def self.debug; false; end
   

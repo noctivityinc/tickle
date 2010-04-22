@@ -23,6 +23,7 @@ module Tickle
       # check to see if this event starts some other time and reset now
       event, starting = text.split('starting')
       @start = (Chronic.parse(starting) || options[:start])
+      @next = nil
 
       # split into tokens
       @tokens = base_tokenize(event)

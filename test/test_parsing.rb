@@ -68,9 +68,8 @@ class TestParsing < Test::Unit::TestCase
 
   private
   def parse_now(string, options={})
-    puts ("attempting to parse '#{string}'")
     out = Tickle.parse(string, {}.merge(options))
-    p ("output: #{out}")
+    puts ("Tickle.parse('#{string}')  #=> #{out}")
     out
   end
 end

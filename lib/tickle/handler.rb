@@ -11,7 +11,12 @@ module Tickle
 
       # defines the next occurrence of this tickle if not set in a guess routine
       @next ||= @start + (interval * 60 * 60 * 24) if interval
-      return [@start.to_time, @next.to_time, interval] if interval
+      
+      # check to see if the start date is > NOW and, if so, set the next occurrence = start
+      @next = @start if @start.to_time > Time.now
+      
+      # return the next occurrence
+      return @next.to_time if interval
     end
 
     def guess_unit_types
