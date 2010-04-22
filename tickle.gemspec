@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{tickle}
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Joshua Lippiner"]
@@ -31,11 +31,7 @@ Gem::Specification.new do |s|
      "lib/tickle/repeater.rb",
      "lib/tickle/tickle.rb",
      "test/helper.rb",
-     "test/suite.rb",
-     "test/test_Time.rb",
-     "test/test_Token.rb",
      "test/test_parsing.rb",
-     "test/test_tickle.rb",
      "tickle.gemspec"
   ]
   s.homepage = %q{http://github.com/noctivityinc/tickle}
@@ -45,11 +41,7 @@ Gem::Specification.new do |s|
   s.summary = %q{natural language parser for recurring events}
   s.test_files = [
     "test/helper.rb",
-     "test/suite.rb",
-     "test/test_parsing.rb",
-     "test/test_tickle.rb",
-     "test/test_Time.rb",
-     "test/test_Token.rb"
+     "test/test_parsing.rb"
   ]
 
   if s.respond_to? :specification_version then
