@@ -11,7 +11,7 @@ class TestParsing < Test::Unit::TestCase
   def test_parse_best_guess
     puts "Time.now"
     p Time.now
-    
+
     parse_now('each day')
 
     parse_now('every day')
@@ -54,6 +54,10 @@ class TestParsing < Test::Unit::TestCase
     parse_now('beginning of the year')
     parse_now('middle of the year')
     parse_now('end of the year')
+
+    parse_now('the 10th of the month')
+    parse_now('the tenth of the month')
+    parse_now('the 3rd Sunday of the month')
   end
 
   def test_argument_validation
