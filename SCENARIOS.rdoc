@@ -10,3 +10,6 @@ every November 15th => month found with number.  interval = 365, start_date = Ch
 every day => word 'day' found without a number.  interval = 1.  start_day = today
 every week => word 'week' found without a number.  interval = 7.  start_day = today
 every month => word 'month' found without a number.  interval = 30.  start_day = today
+
+
+

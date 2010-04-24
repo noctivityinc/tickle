@@ -43,42 +43,52 @@ Tickle HEAVILY uses chronic for parsing both the event and the start date.
   require 'rubygems'
   require 'tickle'
   
-  .Time.now
-  2010-04-22 17:11:52 -0400
+  Time.now
+  2010-04-24 12:05:51 -0400
 
-  Tickle.parse('each day')  #=> 2010-04-23 17:24:24 -0400
-  Tickle.parse('every day')  #=> 2010-04-23 17:24:24 -0400
-  Tickle.parse('every week')  #=> 2010-04-29 17:24:24 -0400
-  Tickle.parse('every Month')  #=> 2010-05-22 17:24:24 -0400
-  Tickle.parse('every year')  #=> 2011-04-22 17:24:24 -0400
-  Tickle.parse('daily')  #=> 2010-04-23 17:24:24 -0400
-  Tickle.parse('weekly')  #=> 2010-04-29 17:24:24 -0400
-  Tickle.parse('monthly')  #=> 2010-05-22 17:24:24 -0400
-  Tickle.parse('yearly')  #=> 2011-04-22 17:24:24 -0400
-  Tickle.parse('every 3 days')  #=> 2010-04-25 17:24:24 -0400
-  Tickle.parse('every 3 weeks')  #=> 2010-05-13 17:24:24 -0400
-  Tickle.parse('every 3 months')  #=> 2010-07-21 17:24:24 -0400
-  Tickle.parse('every 3 years')  #=> 2013-04-21 17:24:24 -0400
-  Tickle.parse('every other day')  #=> 2010-04-24 17:24:24 -0400
-  Tickle.parse('every other week')  #=> 2010-05-06 17:24:24 -0400
-  Tickle.parse('every other month')  #=> 2010-06-22 17:24:24 -0400
-  Tickle.parse('every other year')  #=> 2012-04-22 17:24:24 -0400
+  Tickle.parse('each day')  #=> 2010-04-24 12:05:51 -0400
+  Tickle.parse('every day')  #=> 2010-04-24 12:05:51 -0400
+  Tickle.parse('every week')  #=> 2010-05-01 12:05:51 -0400
+  Tickle.parse('every Month')  #=> 2010-05-24 12:05:51 -0400
+  Tickle.parse('every year')  #=> 2011-04-24 12:05:51 -0400
+  Tickle.parse('daily')  #=> 2010-04-24 12:05:51 -0400
+  Tickle.parse('weekly')  #=> 2010-05-01 12:05:51 -0400
+  Tickle.parse('monthly')  #=> 2010-05-24 12:05:51 -0400
+  Tickle.parse('yearly')  #=> 2011-04-24 12:05:51 -0400
+  Tickle.parse('every 3 days')  #=> 2010-04-27 12:05:51 -0400
+  Tickle.parse('every 3 weeks')  #=> 2010-05-15 12:05:51 -0400
+  Tickle.parse('every 3 months')  #=> 2010-07-23 12:05:51 -0400
+  Tickle.parse('every 3 years')  #=> 2013-04-23 12:05:51 -0400
+  Tickle.parse('every other day')  #=> 2010-04-26 12:05:51 -0400
+  Tickle.parse('every other week')  #=> 2010-05-08 12:05:51 -0400
+  Tickle.parse('every other month')  #=> 2010-06-24 12:05:51 -0400
+  Tickle.parse('every other year')  #=> 2012-04-24 12:05:51 -0400
   Tickle.parse('every other day starting May 1st')  #=> 2010-05-01 12:00:00 -0400
   Tickle.parse('every other week starting this Sunday')  #=> 2010-04-25 12:00:00 -0400
   Tickle.parse('every Monday')  #=> 2010-04-26 12:00:00 -0400
   Tickle.parse('every Wednesday')  #=> 2010-04-28 12:00:00 -0400
-  Tickle.parse('every Friday')  #=> 2010-04-23 12:00:00 -0400
+  Tickle.parse('every Friday')  #=> 2010-04-30 12:00:00 -0400
   Tickle.parse('every May')  #=> 2010-05-01 12:00:00 -0400
   Tickle.parse('every june')  #=> 2010-06-01 12:00:00 -0400
   Tickle.parse('beginning of the week')  #=> 2010-04-25 12:00:00 -0400
   Tickle.parse('middle of the week')  #=> 2010-04-28 12:00:00 -0400
-  Tickle.parse('end of the week')  #=> 2010-04-24 12:00:00 -0400
+  Tickle.parse('end of the week')  #=> 2010-05-01 12:00:00 -0400
   Tickle.parse('beginning of the month')  #=> 2010-05-01 12:00:00 -0400
   Tickle.parse('middle of the month')  #=> 2010-05-15 12:00:00 -0400
   Tickle.parse('end of the month')  #=> 2010-04-30 00:00:00 -0400
   Tickle.parse('beginning of the year')  #=> 2011-01-01 12:00:00 -0500
   Tickle.parse('middle of the year')  #=> 2010-06-15 00:00:00 -0400
   Tickle.parse('end of the year')  #=> 2010-12-31 00:00:00 -0500
+  Tickle.parse('the 3rd of May')  #=> 2010-05-03 12:00:00 -0400
+  Tickle.parse('the 3rd of February')  #=> 2011-02-03 12:00:00 -0500
+  Tickle.parse('the 10th of the month')  #=> 2010-05-10 12:00:00 -0400
+  Tickle.parse('the tenth of the month')  #=> 2010-05-10 12:00:00 -0400
+  Tickle.parse('the first of the month')  #=> 2010-05-01 12:00:00 -0400
+  Tickle.parse('the thirtieth')  #=> 2010-04-30 12:00:00 -0400
+  Tickle.parse('the fifth')  #=> 2010-05-05 12:00:00 -0400
+  Tickle.parse('the 3rd Sunday of May')  #=> 2010-05-16 12:00:00 -0400
+  Tickle.parse('the 3rd Sunday of the month')  #=> 2010-05-16 12:00:00 -0400
+
 
 
 -- USING IN APP
