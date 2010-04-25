@@ -45,7 +45,7 @@ end
 
 class String
   def is_ordinal?
-    scanner = %w{first second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth seventieth eighteenth nineteenth twenty thirty thirtieth}
+    scanner = %w{first second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth nineteenth twenty thirty thirtieth}
     regex = /\b(\d*)(st|nd|rd|th)\b/
     !(self =~ regex).nil? || scanner.include?(self.downcase)
   end
