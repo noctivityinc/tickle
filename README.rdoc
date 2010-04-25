@@ -88,8 +88,12 @@ Tickle HEAVILY uses chronic for parsing both the event and the start date.
   Tickle.parse('the fifth')  #=> 2010-05-05 12:00:00 -0400
   Tickle.parse('the 3rd Sunday of May')  #=> 2010-05-16 12:00:00 -0400
   Tickle.parse('the 3rd Sunday of the month')  #=> 2010-05-16 12:00:00 -0400
-
-
+  Tickle.parse('the 23rd of June')  #=> 2010-06-23 12:00:00 -0400
+  Tickle.parse('the twenty third of June')  #=> 2010-06-23 12:00:00 -0400
+  Tickle.parse('the thirty first of August')  #=> 2010-08-31 12:00:00 -0400
+  Tickle.parse('the twenty first')  #=> 2010-05-21 12:00:00 -0400
+  Tickle.parse('the twenty first of the month')  #=> 2010-05-21 12:00:00 -0400
+  
 
 -- USING IN APP
 
