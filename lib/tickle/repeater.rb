@@ -16,7 +16,7 @@ class Tickle::Repeater < Chronic::Tag #:nodoc:
 
   def self.scan_for_numbers(token)
     num = Float(token.word) rescue nil
-    token.update(:number, nil, num.to_i) if num
+    token.update(:number, num.to_i, num.to_i) if num
     token
   end
 
@@ -40,8 +40,7 @@ class Tickle::Repeater < Chronic::Tag #:nodoc:
     /seventeenth/ => '17th',
     /eighteenth/ => '18th',
     /nineteenth/ => '19th',
-    /twenty/ => '20th',
-    /thirty/ => '30th',
+    /twentieth/ => '20th',
     /thirtieth/ => '30th',
     }
     scanner.keys.each do |scanner_item|
@@ -55,7 +54,7 @@ class Tickle::Repeater < Chronic::Tag #:nodoc:
     token.update(:ordinal, token.original, 365) if !(token.original =~ regex).nil?
     token
   end
-
+  
   def self.scan_for_month_names(token)
     scanner = {/^jan\.?(uary)?$/ => :january,
       /^feb\.?(ruary)?$/ => :february,

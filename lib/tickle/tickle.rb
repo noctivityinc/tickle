@@ -32,6 +32,11 @@ module Tickle
       # remove all tokens without a type
       @tokens.reject! {|token| token.type.nil? }
 
+      # combine number and ordinals into single number
+      combine_multiple_numbers
+
+      @tokens.each {|x| puts x.inspect} if Tickle.debug
+
       return guess
     end
 
@@ -55,7 +60,7 @@ module Tickle
         token.word = normalize(token.original)
       end
     end
-    
+
     # Clean up the specified input text by stripping unwanted characters,
     # converting idioms to their canonical form, converting number words
     # to numbers (three => 3), and converting ordinal words to numeric
@@ -87,7 +92,19 @@ module Tickle
     def numericize_ordinals(text) #:nodoc:
       text = text.gsub(/\b(\d*)(st|nd|rd|th)\b/, '\1')
     end
-    
+
+    # Turns compound numbers, like 'twenty first' => 21
+    def combine_multiple_numbers
+      if [:number, :ordinal].all? {|type| token_types.include? type}
+        number = token_of_type(:number)
+        ordinal = token_of_type(:ordinal)
+        combined_value = (number.start.to_s[0] + ordinal.start.to_s)
+        new_number_token = Token.new(combined_value, combined_value, :ordinal, combined_value, 365)
+        @tokens.reject! {|token| (token.type == :number || token.type == :ordinal)}
+        @tokens << new_number_token
+      end
+    end
+
     # Returns an array of types for all tokens
     def token_types
       @tokens.map(&:type)
@@ -97,9 +114,12 @@ module Tickle
   class Token #:nodoc:
     attr_accessor :original, :word, :type, :interval, :start
 
-    def initialize(original)
+    def initialize(original, word=nil, type=nil, start=nil, interval=nil)
       @original = original
-      @word = @type = @interval = @start = nil
+      @word = word
+      @type = type
+      @interval = interval
+      @start = start
     end
 
     def update(type, start=nil, interval=nil)

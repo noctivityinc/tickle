@@ -114,7 +114,6 @@ module Tickle
       @tokens.detect {|token| token.type == type}
     end
 
-
     private
 
     def get_next_month(ordinal)
