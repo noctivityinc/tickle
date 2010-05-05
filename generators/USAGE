@@ -1,0 +1,7 @@
+Description:
+	The ticklish migration generator creates a migration to add the tickles table.
+
+Example:
+    ./script/generate ticklish_migration
+
+    This will create a migration in db/migrate/.  Run "rake db:migrate" to update your database.
