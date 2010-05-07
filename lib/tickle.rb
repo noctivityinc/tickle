@@ -6,7 +6,8 @@
 #
 #=============================================================================
 
-$:.unshift File.dirname(__FILE__)     # For use/testing when no gem is installed
+
+$LOAD_PATH.unshift(File.dirname(__FILE__))     # For use/testing when no gem is installed
 
 require 'date'
 require 'time'
@@ -17,7 +18,7 @@ require 'tickle/handler'
 require 'tickle/repeater'
 
 module Tickle
-  VERSION = "0.0.3"
+  VERSION = "0.1.3"
 
   def self.debug; false; end
 

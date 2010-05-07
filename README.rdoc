@@ -2,6 +2,10 @@
   http://github.com/noctivityinc/tickle
   by Joshua Lippiner, Noctivity
 
+** LEGACY WARNING
+
+If you starting using Tickle pre version 0.1.X, you will need to update your code to either include the :next_only => true option or read correctly from the options hash.  Sorry.
+
 -- DESCRIPTION
 
 Tickle is a natural language parser for recurring events.
@@ -30,82 +34,143 @@ thoughtbot's shoulda (gem install shoulda)
 
 You can parse strings containing a natural language interval using the Tickle.parse method.
 
-Tickle.parse returns the next occurrence of the event.
+You can either pass a string prefixed with the word "every, each or 'on the'" or simply the time frame.   
 
-You can either pass a string prefixed with the word "every, each or 'on the'" or simply the time frame.   You can also pass a start date with the word "starting" (e.g. Tickle.parse('every 3 days starting next friday'))
+Tickle.parse returns a hash containing the following keys:
+* next = the next occurrence of the event.  This is NEVER today as its always the next date in the future.
+* starting = the date all calculations as based on.  If not passed as an option, the start date is right now.
+* until = the last date you want this event to run until.
+* expression = this is the natural language expression to store to run through tickle later to get the next occurrence.
 
 Tickle returns nil if it cannot parse the string cannot be parsed.
 
 Tickle HEAVILY uses chronic for parsing both the event and the start date.
 
+-- OPTIONS
+
+There are two ways to pass options: natural language or an options hash.
+
+NATURAL LANGUAGE:
+Pass a start date with the word "starting, start, stars" (e.g. Tickle.parse('every 3 days starting next friday'))
+Pass an end date with the word "until, end, ends, ending" (e.g. Tickle.parse('every 3 days until next friday'))
+Pass both at the same time (e.g. "starting May 5th repeat every other week until December 1")
+
+OPTIONS HASH
+Valid options are:
+* start - must be a valid date. (e.g. Tickle.parse('every other day', {:start => Date.new(2010,8,1) }))
+* until - must be a valid date. (e.g. Tickle.parse('every other day', {:until => Date.new(2010,10,1) }))
+* next_only - legacy switch to ONLY return the next occurrence as a date and not return a hash
+
+-- SUPER IMPORTANT NOTE ABOUT NEXT OCCURRENCE & START DATE
+
+You may notice when parsing an expression with a start date that the next occurrence IS the start date passed.  This is DESIGNED BEHAVIOR.  
+
+Here's why - assume your user says "remind me every 3 weeks starting Dec 1" and today is May 8th.  Well the first reminder needs to be sent on Dec 1, not Dec 21 (three weeks later). 
+
+If you don't like that, fork and have fun but don't say I didn't warn ya.
+
 -- EXAMPLES
 
   require 'rubygems'
   require 'tickle'
-  
-  Time.now
-  2010-04-24 12:05:51 -0400
 
-  Tickle.parse('each day')  #=> 2010-04-24 12:05:51 -0400
-  Tickle.parse('every day')  #=> 2010-04-24 12:05:51 -0400
-  Tickle.parse('every week')  #=> 2010-05-01 12:05:51 -0400
-  Tickle.parse('every Month')  #=> 2010-05-24 12:05:51 -0400
-  Tickle.parse('every year')  #=> 2011-04-24 12:05:51 -0400
-  Tickle.parse('daily')  #=> 2010-04-24 12:05:51 -0400
-  Tickle.parse('weekly')  #=> 2010-05-01 12:05:51 -0400
-  Tickle.parse('monthly')  #=> 2010-05-24 12:05:51 -0400
-  Tickle.parse('yearly')  #=> 2011-04-24 12:05:51 -0400
-  Tickle.parse('every 3 days')  #=> 2010-04-27 12:05:51 -0400
-  Tickle.parse('every 3 weeks')  #=> 2010-05-15 12:05:51 -0400
-  Tickle.parse('every 3 months')  #=> 2010-07-23 12:05:51 -0400
-  Tickle.parse('every 3 years')  #=> 2013-04-23 12:05:51 -0400
-  Tickle.parse('every other day')  #=> 2010-04-26 12:05:51 -0400
-  Tickle.parse('every other week')  #=> 2010-05-08 12:05:51 -0400
-  Tickle.parse('every other month')  #=> 2010-06-24 12:05:51 -0400
-  Tickle.parse('every other year')  #=> 2012-04-24 12:05:51 -0400
-  Tickle.parse('every other day starting May 1st')  #=> 2010-05-01 12:00:00 -0400
-  Tickle.parse('every other week starting this Sunday')  #=> 2010-04-25 12:00:00 -0400
-  Tickle.parse('every Monday')  #=> 2010-04-26 12:00:00 -0400
-  Tickle.parse('every Wednesday')  #=> 2010-04-28 12:00:00 -0400
-  Tickle.parse('every Friday')  #=> 2010-04-30 12:00:00 -0400
-  Tickle.parse('every May')  #=> 2010-05-01 12:00:00 -0400
-  Tickle.parse('every june')  #=> 2010-06-01 12:00:00 -0400
-  Tickle.parse('beginning of the week')  #=> 2010-04-25 12:00:00 -0400
-  Tickle.parse('middle of the week')  #=> 2010-04-28 12:00:00 -0400
-  Tickle.parse('end of the week')  #=> 2010-05-01 12:00:00 -0400
-  Tickle.parse('beginning of the month')  #=> 2010-05-01 12:00:00 -0400
-  Tickle.parse('middle of the month')  #=> 2010-05-15 12:00:00 -0400
-  Tickle.parse('end of the month')  #=> 2010-04-30 00:00:00 -0400
-  Tickle.parse('beginning of the year')  #=> 2011-01-01 12:00:00 -0500
-  Tickle.parse('middle of the year')  #=> 2010-06-15 00:00:00 -0400
-  Tickle.parse('end of the year')  #=> 2010-12-31 00:00:00 -0500
-  Tickle.parse('the 3rd of May')  #=> 2010-05-03 12:00:00 -0400
-  Tickle.parse('the 3rd of February')  #=> 2011-02-03 12:00:00 -0500
-  Tickle.parse('the 10th of the month')  #=> 2010-05-10 12:00:00 -0400
-  Tickle.parse('the tenth of the month')  #=> 2010-05-10 12:00:00 -0400
-  Tickle.parse('the first of the month')  #=> 2010-05-01 12:00:00 -0400
-  Tickle.parse('the thirtieth')  #=> 2010-04-30 12:00:00 -0400
-  Tickle.parse('the fifth')  #=> 2010-05-05 12:00:00 -0400
-  Tickle.parse('the 3rd Sunday of May')  #=> 2010-05-16 12:00:00 -0400
-  Tickle.parse('the 3rd Sunday of the month')  #=> 2010-05-16 12:00:00 -0400
-  Tickle.parse('the 23rd of June')  #=> 2010-06-23 12:00:00 -0400
-  Tickle.parse('the twenty third of June')  #=> 2010-06-23 12:00:00 -0400
-  Tickle.parse('the thirty first of August')  #=> 2010-08-31 12:00:00 -0400
-  Tickle.parse('the twenty first')  #=> 2010-05-21 12:00:00 -0400
-  Tickle.parse('the twenty first of the month')  #=> 2010-05-21 12:00:00 -0400
+  .Time.now
+  2010-05-07 14:01:19 -0400
+
+SIMPLE
+  Tickle.parse('day')  #=> {:next=>2010-05-08 14:01:19 -0400, :recurrence_expression=>"day", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('day')  #=> {:next=>2010-05-08 14:01:19 -0400, :recurrence_expression=>"day", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('week')  #=> {:next=>2010-05-14 14:01:19 -0400, :recurrence_expression=>"week", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('Month')  #=> {:next=>2010-06-07 14:01:19 -0400, :recurrence_expression=>"month", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('year')  #=> {:next=>2011-05-07 14:01:19 -0400, :recurrence_expression=>"year", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('daily')  #=> {:next=>2010-05-08 14:01:19 -0400, :recurrence_expression=>"daily", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('weekly')  #=> {:next=>2010-05-14 14:01:19 -0400, :recurrence_expression=>"weekly", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('monthly')  #=> {:next=>2010-06-07 14:01:19 -0400, :recurrence_expression=>"monthly", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('yearly')  #=> {:next=>2011-05-07 14:01:19 -0400, :recurrence_expression=>"yearly", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('3 days')  #=> {:next=>2010-05-10 14:01:19 -0400, :recurrence_expression=>"3 days", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('3 weeks')  #=> {:next=>2010-05-28 14:01:19 -0400, :recurrence_expression=>"3 weeks", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('3 months')  #=> {:next=>2010-08-08 14:01:19 -0400, :recurrence_expression=>"3 months", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('3 years')  #=> {:next=>2013-05-06 14:01:19 -0400, :recurrence_expression=>"3 years", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('other day')  #=> {:next=>2010-05-09 14:01:19 -0400, :recurrence_expression=>"other day", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('other week')  #=> {:next=>2010-05-21 14:01:19 -0400, :recurrence_expression=>"other week", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('other month')  #=> {:next=>2010-07-07 14:01:19 -0400, :recurrence_expression=>"other month", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('other year')  #=> {:next=>2012-05-07 14:01:19 -0400, :recurrence_expression=>"other year", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('Monday')  #=> {:next=>2010-05-10 12:00:00 -0400, :recurrence_expression=>"monday", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('Wednesday')  #=> {:next=>2010-05-12 12:00:00 -0400, :recurrence_expression=>"wednesday", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('Friday')  #=> {:next=>2010-05-14 12:00:00 -0400, :recurrence_expression=>"friday", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('May')  #=> {:next=>2011-05-01 12:00:00 -0400, :recurrence_expression=>"may", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('june')  #=> {:next=>2010-06-01 12:00:00 -0400, :recurrence_expression=>"june", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('beginning of the week')  #=> {:next=>2010-05-09 12:00:00 -0400, :recurrence_expression=>"beginning of the week", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('middle of the week')  #=> {:next=>2010-05-12 12:00:00 -0400, :recurrence_expression=>"middle of the week", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('end of the week')  #=> {:next=>2010-05-08 12:00:00 -0400, :recurrence_expression=>"end of the week", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('beginning of the month')  #=> {:next=>2010-06-01 00:00:00 -0400, :recurrence_expression=>"beginning of the month", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('middle of the month')  #=> {:next=>2010-05-15 00:00:00 -0400, :recurrence_expression=>"middle of the month", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('end of the month')  #=> {:next=>2010-05-31 00:00:00 -0400, :recurrence_expression=>"end of the month", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('beginning of the year')  #=> {:next=>2011-01-01 00:00:00 -0500, :recurrence_expression=>"beginning of the year", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('middle of the year')  #=> {:next=>2010-06-15 00:00:00 -0400, :recurrence_expression=>"middle of the year", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('end of the year')  #=> {:next=>2010-12-31 00:00:00 -0500, :recurrence_expression=>"end of the year", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the 3rd of May')  #=> {:next=>2011-05-03 12:00:00 -0400, :recurrence_expression=>"the 3rd of may", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the 3rd of February')  #=> {:next=>2011-02-03 12:00:00 -0500, :recurrence_expression=>"the 3rd of february", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the 3rd of February 2012')  #=> {:next=>2012-02-03 12:00:00 -0500, :recurrence_expression=>"the 3rd of february 2012", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the 3rd of Feb 2012')  #=> {:next=>2012-02-03 12:00:00 -0500, :recurrence_expression=>"the 3rd of feb 2012", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the 4th of the month')  #=> {:next=>2010-06-04 12:00:00 -0400, :recurrence_expression=>"the 4th of the month", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the 10th of the month')  #=> {:next=>2010-05-10 12:00:00 -0400, :recurrence_expression=>"the 10th of the month", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the tenth of the month')  #=> {:next=>2010-05-10 12:00:00 -0400, :recurrence_expression=>"the tenth of the month", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the first of the month')  #=> {:next=>2010-06-01 12:00:00 -0400, :recurrence_expression=>"the first of the month", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the thirtieth')  #=> {:next=>2010-05-30 12:00:00 -0400, :recurrence_expression=>"the thirtieth", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the fifth')  #=> {:next=>2010-06-05 12:00:00 -0400, :recurrence_expression=>"the fifth", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the 3rd Sunday of May')  #=> {:next=>2010-05-16 12:00:00 -0400, :recurrence_expression=>"the 3rd sunday of may", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the 3rd Sunday of the month')  #=> {:next=>2010-06-20 12:00:00 -0400, :recurrence_expression=>"the 3rd sunday of the month", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the 23rd of June')  #=> {:next=>2010-06-23 12:00:00 -0400, :recurrence_expression=>"the 23rd of june", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the twenty third of June')  #=> {:next=>2010-06-23 12:00:00 -0400, :recurrence_expression=>"the twenty third of june", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the thirty first of August')  #=> {:next=>2010-08-31 12:00:00 -0400, :recurrence_expression=>"the thirty first of august", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the twenty first')  #=> {:next=>2010-05-21 12:00:00 -0400, :recurrence_expression=>"the twenty first", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('the twenty first of the month')  #=> {:next=>2010-05-21 12:00:00 -0400, :recurrence_expression=>"the twenty first of the month", :starting=>2010-05-07 14:01:19 -0400}
   
+COMPLEX
+  Tickle.parse('starting Monday repeat every month')  #=> {:next=>2010-05-10 12:00:00 -0400, :recurrence_expression=>"month", :starting=>2010-05-10 12:00:00 -0400}
+  Tickle.parse('starting May 13th repeat every week')  #=> {:next=>2010-05-13 12:00:00 -0400, :recurrence_expression=>"week", :starting=>2010-05-13 12:00:00 -0400}
+  Tickle.parse('starting May 13th repeat every other day')  #=> {:next=>2010-05-13 12:00:00 -0400, :recurrence_expression=>"other day", :starting=>2010-05-13 12:00:00 -0400}
+  Tickle.parse('every week starts this wednesday')  #=> {:next=>2010-05-12 12:00:00 -0400, :recurrence_expression=>"week", :starting=>2010-05-12 12:00:00 -0400}
+  Tickle.parse('every other day starts the 1st May')  #=> {:next=>2011-05-01 12:00:00 -0400, :recurrence_expression=>"other day", :starting=>2011-05-01 12:00:00 -0400}
+  Tickle.parse('every other day starting May 6')  #=> {:next=>2010-05-09 14:01:19 -0400, :recurrence_expression=>"other day", :starting=>2010-05-07 14:01:19 -0400}
+  Tickle.parse('every week starting this wednesday')  #=> {:next=>2010-05-12 12:00:00 -0400, :recurrence_expression=>"week", :starting=>2010-05-12 12:00:00 -0400}
+  Tickle.parse('every other day starting the 1st May')  #=> {:next=>2011-05-01 12:00:00 -0400, :recurrence_expression=>"other day", :starting=>2011-05-01 12:00:00 -0400}
+  Tickle.parse('every other day starting May 1st 2011')  #=> {:next=>2011-05-01 12:00:00 -0400, :recurrence_expression=>"other day", :starting=>2011-05-01 12:00:00 -0400}
+  Tickle.parse('every other week starting this Sunday')  #=> {:next=>2010-05-09 12:00:00 -0400, :recurrence_expression=>"other week", :starting=>2010-05-09 12:00:00 -0400}
+  Tickle.parse('every week starting this wednesday until June 5th')  #=> {:next=>2010-05-14 14:01:19 -0400, :recurrence_expression=>"week", :starting=>2010-05-07 14:01:19 -0400, :until=>2010-06-05 12:00:00 -0400}
+  Tickle.parse('every week starting this wednesday ends June 5th')  #=> {:next=>2010-05-14 14:01:19 -0400, :recurrence_expression=>"week", :starting=>2010-05-07 14:01:19 -0400, :until=>2010-06-05 12:00:00 -0400}
+  Tickle.parse('every week starting this wednesday ending June 5th')  #=> {:next=>2010-05-14 14:01:19 -0400, :recurrence_expression=>"week", :starting=>2010-05-07 14:01:19 -0400, :until=>2010-06-05 12:00:00 -0400}
+  
+WITH OPTIONS HASH  
+  .Tickle.parse('May 1st 2011, {:next_only=>true}')  #=> 2011-05-01 12:00:00 -0400
+  Tickle.parse('every 3 days, {:start=>Mon, 17 May 2010}')  #=> {:next=>2010-05-17 00:00:00 -0400, :recurrence_expression=>"every 3 days", :starting=>2010-05-17 00:00:00 -0400}
+  Tickle.parse('every 3 weeks, {:start=>Mon, 17 May 2010}')  #=> {:next=>2010-05-17 00:00:00 -0400, :recurrence_expression=>"every 3 weeks", :starting=>2010-05-17 00:00:00 -0400}
+  Tickle.parse('every 3 months, {:start=>Mon, 17 May 2010}')  #=> {:next=>2010-05-17 00:00:00 -0400, :recurrence_expression=>"every 3 months", :starting=>2010-05-17 00:00:00 -0400}
+  Tickle.parse('every 3 years, {:start=>Mon, 17 May 2010}')  #=> {:next=>2010-05-17 00:00:00 -0400, :recurrence_expression=>"every 3 years", :starting=>2010-05-17 00:00:00 -0400}
+  Tickle.parse('every 3 days, {:start=>Mon, 17 May 2010, :until=>Thu, 07 Oct 2010}')  #=> {:next=>2010-05-17 00:00:00 -0400, :recurrence_expression=>"every 3 days", :starting=>2010-05-17 00:00:00 -0400, :until=>2010-10-07 00:00:00 -0400}
+  Tickle.parse('every 3 weeks, {:start=>Mon, 17 May 2010, :until=>Thu, 07 Oct 2010}')  #=> {:next=>2010-05-17 00:00:00 -0400, :recurrence_expression=>"every 3 weeks", :starting=>2010-05-17 00:00:00 -0400, :until=>2010-10-07 00:00:00 -0400}
+  Tickle.parse('3 months, {:until=>Thu, 07 Oct 2010}')  #=> {:next=>2010-08-08 14:01:19 -0400, :recurrence_expression=>"3 months", :starting=>2010-05-07 14:01:19 -0400, :until=>2010-10-07 00:00:00 -0400}
+  .
 
 -- USING IN APP
 
 To use in your app, we recommend adding two attributes to your database model:
 * next_occurrence
-* tickle_query
+* tickle_expression
 
 Then call Tickle.parse(query) when you need to and save the results accordingly.  In your 
 code, each day, simply check to see if today is >= next_occurrence and, if so, run your block.
 
-After it completes, call Tickle.parse(tickle_query) again to update the next occurrence of the event.
+After it completes, call Tickle.parse(tickle_expression) again to update the next occurrence of the event.
 
+
+-- TESTING
+
+Tickle comes with a full testing suite that tests and shows sample output for simple, complex, options hash and invalid arguments.
+
+Please note, the tests were designed to output the parsed expression and not return true.  This allows (and sorry, forces you) to have to skim through the 
+results and queries to ensure they are working correctly.  You can also add your own for fun.
 
 -- LIMITATIONS
 
@@ -117,6 +182,8 @@ HUGE shout-out to both the creator of Chronic, Tom Preston-Werner (http://chroni
 
 Without their work and code structure I'd be lost.
 
+As always, BIG shout-out to the RVM Master himself, Wayne Seguin, for putting up with me and Ruby from day one.  Ask Wayne to make you some Ciabatta bread next time you see him
+
 
 == Note on Patches/Pull Requests
  
@@ -126,7 +193,7 @@ Without their work and code structure I'd be lost.
   future version unintentionally.
 * Commit, do not mess with rakefile, version, or history.
   (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
+* Send me a pull request. Bonus points for time-based branches.
 
 == Copyright
 

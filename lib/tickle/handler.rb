@@ -2,75 +2,62 @@ module Tickle
   class << self
 
     def guess()
-      interval = guess_unit_types
-      interval ||= guess_weekday
-      interval ||= guess_month_names
-      interval ||= guess_number_and_unit
-      interval ||= guess_ordinal
-      interval ||= guess_ordinal_and_unit
-      interval ||= guess_special
+      guess_unit_types
+      guess_weekday unless @next
+      guess_month_names unless @next
+      guess_number_and_unit unless @next
+      guess_ordinal unless @next
+      guess_ordinal_and_unit unless @next
+      guess_special unless @next
 
-      # defines the next occurrence of this tickle if not set in a guess routine
-      @next ||= @start + (interval * 60 * 60 * 24) if interval
-
-      # check to see if the start date is > NOW and, if so, set the next occurrence = start
-      @next = @start if @start.to_time > Time.now
+      # check to see if next is less than now and, if so, set it to next year
+      @next = Time.local(@next.year + 1, @next.month, @next.day, @next.hour, @next.min, @next.sec) if @next && @next.to_date < @start.to_date 
 
       # return the next occurrence
-      return @next.to_time if interval
+      return @next.to_time if @next
     end
 
     def guess_unit_types
-      interval = 0 if token_types.same?([:day])
+      interval = 1 if token_types.same?([:day])
       interval = 7 if token_types.same?([:week])
-      interval = 30 if token_types.same?([:month])
+      interval = Tickle.days_in_month if token_types.same?([:month])
       interval = 365 if token_types.same?([:year])
-      interval
+      compute_next(interval)
     end
 
     def guess_weekday
-      if token_types.same?([:weekday]) then
-        @start = Chronic.parse(token_of_type(:weekday).start.to_s)
-        interval = 7
-      end
-      interval
+      @next = chronic_parse("#{token_of_type(:weekday).start.to_s}") if token_types.same?([:weekday])
     end
 
     def guess_month_names
-      if token_types.same?([:month_name]) then
-        @start = Chronic.parse("#{token_of_type(:month_name).start.to_s} 1")
-        interval = 30
-      end
-      interval
+      @next = chronic_parse("#{token_of_type(:month_name).start.to_s} 1") if token_types.same?([:month_name])
     end
 
     def guess_number_and_unit
       interval = token_of_type(:number).interval if token_types.same?([:number, :day])
       interval = (token_of_type(:number).interval * 7) if token_types.same?([:number, :week])
-      interval = (token_of_type(:number).interval * 30) if token_types.same?([:number, :month])
+      interval = (token_of_type(:number).interval * Tickle.days_in_month) if token_types.same?([:number, :month])
       interval = (token_of_type(:number).interval * 365) if token_types.same?([:number, :year])
-      interval
+      compute_next(interval)
     end
 
     def guess_ordinal
-      if token_types.same?([:ordinal]) then interval = 365; @next = Chronic.parse("#{token_of_type(:ordinal).start} day in #{Date::MONTHNAMES[get_next_month(token_of_type(:ordinal).start)]}"); end
-      interval
+      @next = chronic_parse("#{token_of_type(:ordinal).word} day in #{Date::MONTHNAMES[get_next_month(token_of_type(:ordinal).start)]}") if token_types.same?([:ordinal]) 
     end
 
     def guess_ordinal_and_unit
-      parse_text = ''
-      if token_types.same?([:ordinal, :month_name]) then interval = 365; @next = Chronic.parse("#{token_of_type(:ordinal).original} day in #{token_of_type(:month_name).start.to_s}"); end
-      if token_types.same?([:ordinal, :month]) then interval = 365; @next = Chronic.parse("#{token_of_type(:ordinal).start} day in #{Date::MONTHNAMES[get_next_month(token_of_type(:ordinal).start)]}"); end
-      if token_types.same?([:ordinal, :weekday, :month_name]) then interval = 365; @next = Chronic.parse("#{token_of_type(:ordinal).original} #{token_of_type(:weekday).start.to_s} in #{token_of_type(:month_name).start.to_s}"); end
-      if token_types.same?([:ordinal, :weekday, :month]) then interval = 365; @next = Chronic.parse("#{token_of_type(:ordinal).original} #{token_of_type(:weekday).start.to_s} in #{Date::MONTHNAMES[get_next_month(token_of_type(:ordinal).start)]}"); end
-      interval
+      @next = chronic_parse("#{token_of_type(:ordinal).word} day in #{token_of_type(:month_name).start.to_s} ") if token_types.same?([:ordinal, :month_name])
+      @next = chronic_parse("#{token_of_type(:ordinal).word} day in #{Date::MONTHNAMES[get_next_month(token_of_type(:ordinal).start)]}") if token_types.same?([:ordinal, :month]) 
+      @next = chronic_parse("#{token_of_type(:ordinal).word} #{token_of_type(:weekday).start.to_s} in #{token_of_type(:month_name).start.to_s}") if token_types.same?([:ordinal, :weekday, :month_name]) 
+      @next = chronic_parse("#{token_of_type(:ordinal).word} #{token_of_type(:weekday).start.to_s} in #{Date::MONTHNAMES[get_next_month(token_of_type(:ordinal).start)]}") if token_types.same?([:ordinal, :weekday, :month]) 
+      @next = chronic_parse("#{token_of_type(:month_name).word} #{token_of_type(:ordinal).start} #{token_of_type(:specific_year).word}") if token_types.same?([:ordinal, :month_name, :specific_year])
     end
 
     def guess_special
-      interval = guess_special_other
-      interval ||= guess_special_beginning
-      interval ||= guess_special_middle
-      interval ||= guess_special_end
+      guess_special_other
+      guess_special_beginning unless @next
+      guess_special_middle unless @next
+      guess_special_end unless @next
     end
 
     private
@@ -78,36 +65,31 @@ module Tickle
     def guess_special_other
       interval = 2 if token_types.same?([:special, :day]) && token_of_type(:special).start == :other
       interval = 14 if token_types.same?([:special, :week]) && token_of_type(:special).start == :other
-      if token_types.same?([:special, :month]) && token_of_type(:special).start == :other then interval = 60;  @next = Chronic.parse('2 months from now'); end
-      if token_types.same?([:special, :year]) && token_of_type(:special).start == :other then interval = 730;  @next = Chronic.parse('2 years from now'); end
-      interval
+      @next = chronic_parse('2 months from now') if token_types.same?([:special, :month]) && token_of_type(:special).start == :other 
+      @next = chronic_parse('2 years from now') if token_types.same?([:special, :year]) && token_of_type(:special).start == :other 
+      compute_next(interval)
     end
 
     def guess_special_beginning
-      if token_types.same?([:special, :week]) && token_of_type(:special).start == :beginning then interval = 7;  @start = Chronic.parse('Sunday'); end
-      if token_types.same?([:special, :month]) && token_of_type(:special).start == :beginning then interval = 30;  @start = Chronic.parse('1st day next month'); end
-      if token_types.same?([:special, :year]) && token_of_type(:special).start == :beginning then interval = 365;  @start = Chronic.parse('1st day next year'); end
-      interval
+      if token_types.same?([:special, :week]) && token_of_type(:special).start == :beginning then @next = chronic_parse('Sunday'); end
+      if token_types.same?([:special, :month]) && token_of_type(:special).start == :beginning then @next = Date.civil(@start.year, @start.month + 1, 1); end
+      if token_types.same?([:special, :year]) && token_of_type(:special).start == :beginning then @next = Date.civil(@start.year+1, 1, 1); end
     end
 
     def guess_special_end
-      if token_types.same?([:special, :week]) && token_of_type(:special).start == :end then interval = 7;  @start = Chronic.parse('Saturday'); end
-      if token_types.same?([:special, :month]) && token_of_type(:special).start == :end then interval = 30;  @start = Date.new(Date.today.year, Date.today.month, Date.today.days_in_month); end
-      if token_types.same?([:special, :year]) && token_of_type(:special).start == :end then interval = 365;  @start = Date.new(Date.today.year, 12, 31); end
-      interval
+      if token_types.same?([:special, :week]) && token_of_type(:special).start == :end then @next = chronic_parse('Saturday'); end
+      if token_types.same?([:special, :month]) && token_of_type(:special).start == :end then @next = Date.civil(@start.year, @start.month, -1); end
+      if token_types.same?([:special, :year]) && token_of_type(:special).start == :end then @next = Date.new(@start.year, 12, 31); end
     end
 
     def guess_special_middle
-      if token_types.same?([:special, :week]) && token_of_type(:special).start == :middle then interval = 7;  @start = Chronic.parse('Wednesday'); end
+      if token_types.same?([:special, :week]) && token_of_type(:special).start == :middle then @next = chronic_parse('Wednesday'); end
       if token_types.same?([:special, :month]) && token_of_type(:special).start == :middle then
-        interval = 30;
-        @start = (Date.today.day > 15 ? Chronic.parse('15th day of next month') : Date.new(Date.today.year, Date.today.month, 15))
+        @next = (@start.day > 15 ? Date.civil(@start.year, @start.month + 1, 15) : Date.civil(@start.year, @start.month, 15))
       end
       if token_types.same?([:special, :year]) && token_of_type(:special).start == :middle then
-        interval = 365;
-        @start = (Date.today.day > 15 && Date.today.month > 6 ? Date.new(Date.today.year+1, 6, 15) : Date.new(Date.today.year, 6, 15))
+        @next = (@start.day > 15 && @start.month > 6 ? Date.new(@start.year+1, 6, 15) : Date.new(@start.year, 6, 15))
       end
-      interval
     end
 
     def token_of_type(type)
@@ -116,10 +98,16 @@ module Tickle
 
     private
 
-    def get_next_month(ordinal)
-      ord_to_int = ordinal.gsub(/\b(\d*)(st|nd|rd|th)\b/,'\1').to_i
-      month = (ord_to_int < Date.today.day ? Date.today.month + 1 : Date.today.month)
+    def compute_next(interval)
+      # defines the next occurrence of this tickle if not set in a guess routine
+      @next ||= @start + (interval * 60 * 60 * 24) if interval
     end
+    
+    def chronic_parse(exp)
+      puts "date expression: #{exp}" if Tickle.debug
+      Chronic.parse(exp, :now => @start)
+    end
+
 
   end
 end

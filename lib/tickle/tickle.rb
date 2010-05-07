@@ -3,8 +3,11 @@ module Tickle
 
     def parse(text, specified_options = {})
       # get options and set defaults if necessary
-      default_options = {:start => Time.now}
+      default_options = {:start => Time.now, :next_only => false, :until  => nil}
       options = default_options.merge specified_options
+
+      # ensure an expression was provided
+      raise(InvalidArgumentException, 'date expression is required') unless text
 
       # ensure the specified options are valid
       specified_options.keys.each do |key|
@@ -12,40 +15,107 @@ module Tickle
       end
       raise(InvalidArgumentException, ':start specified is not a valid datetime.') unless  (is_date(specified_options[:start]) || Chronic.parse(specified_options[:start])) if specified_options[:start]
 
+      # check to see if a valid datetime was passed
+      return text if text.is_a?(Date) ||  text.is_a?(Time)
+
       # check to see if this event starts some other time and reset now
-      event, starting = text.split('starting')
-      @start = (Chronic.parse(starting) || options[:start])
+      event = scan_expression(text, options)
+
+      raise(InvalidDateExpression, "the start date (#{@start.to_date}) for a recurring event cannot occur in the past ") if @start.to_date < Date.today
+      raise(InvalidDateExpression, "the start date (#{@start.to_date}) cannot occur after the end date") if @until && @start.to_date > @until.to_date
+
+      # no need to guess at expression if the start_date is in the future
+      best_guess = nil
+      if @start.to_time > Time.now
+        best_guess = @start
+      else
+        # put the text into a normal format to ease scanning using Chronic
+        event = pre_filter(event)
+
+        # split into tokens
+        @tokens = base_tokenize(event)
+
+        # process each original word for implied word
+        post_tokenize
+
+        # @tokens.each {|x| puts x.inspect} if Tickle.debug
+
+        # scan the tokens with each token scanner
+        @tokens = Repeater.scan(@tokens)
+
+        # remove all tokens without a type
+        @tokens.reject! {|token| token.type.nil? }
+
+        # combine number and ordinals into single number
+        combine_multiple_numbers
+
+        @tokens.each {|x| puts x.inspect} if Tickle.debug
+
+        best_guess = guess
+      end
+
+      raise(InvalidDateExpression, "the next occurrence takes place after the end date specified") if @until && best_guess.to_date > @until.to_date
+
+      if !best_guess
+        return nil
+      elsif options[:next_only] != true
+        h = {:next => best_guess.to_time, :recurrence_expression => event.strip}
+        h.merge!({:starting => @start.to_time}) if @start
+        h.merge!({:until => @until.to_time}) if @until
+        return h
+      else
+        return best_guess
+      end
+    end
+
+    # scans the expression for a variety of natural formats, such as 'every thursday starting tomorrow until May 15th
+    def scan_expression(text, options)
+      starting = ending = nil
+
+      start_every_regex = /^(start(?:s|ing)?)\s(.*)(\s(?:every|each|on|repeat)(?:s|ing)?)(.*)/i
+      every_start_regex = /^(every|each|on|repeat(?:the)?)\s(.*)(\s(?:start)(?:s|ing)?)(.*)/i
+      if text =~ start_every_regex
+        starting = text.match(start_every_regex)[2]
+        text = text.match(start_every_regex)[4]
+        event, ending = process_for_ending(text)
+      elsif text =~ every_start_regex
+        event = text.match(every_start_regex)[2]
+        text = text.match(every_start_regex)[4]
+        starting, ending = process_for_ending(text)
+      else
+        event, ending = process_for_ending(text)
+      end
+
+      @start = (starting && Tickle.parse(pre_filter(starting), {:next_only => true}) || options[:start])
+      @until = (ending && Tickle.parse(pre_filter(ending), {:next_only => true})  || options[:until])
       @next = nil
+      return event
+    end
 
-      # put the text into a normal format to ease scanning using Chronic
-      event = pre_tokenize(event)
+    def inspect_matches
 
-      # split into tokens
-      @tokens = base_tokenize(event)
+    end
 
-      # process each original word for implied word
-      post_tokenize
-
-      # scan the tokens with each token scanner
-      @tokens = Repeater.scan(@tokens)
-
-      # remove all tokens without a type
-      @tokens.reject! {|token| token.type.nil? }
-
-      # combine number and ordinals into single number
-      combine_multiple_numbers
-
-      @tokens.each {|x| puts x.inspect} if Tickle.debug
-
-      return guess
+    # process the remaining expression to see if an until, end, ending is specified
+    def process_for_ending(text)
+      regex = /^(.*)(\s(?:end|until)(?:s|ing)?)(.*)/i
+      if text =~ regex
+        return text.match(regex)[1], text.match(regex)[3]
+      else
+        return text, nil
+      end
     end
 
     # Normalize natural string removing prefix language
-    def pre_tokenize(text)
-      normalized_text = text.gsub(/^every\s\b/, '')
-      normalized_text = text.gsub(/^each\s\b/, '')
-      normalized_text = text.gsub(/^on the\s\b/, '')
-      normalized_text.downcase
+    def pre_filter(text)
+      return nil unless text
+
+      text.gsub!(/every(\s)?/, '')
+      text.gsub!(/each(\s)?/, '')
+      text.gsub!(/repeat(s|ing)?(\s)?/, '')
+      text.gsub!(/on the(\s)?/, '')
+      text.gsub!(/([^\w\d\s])+/, '')
+      text.downcase.strip
     end
 
     # Split the text on spaces and convert each word into
@@ -85,12 +155,7 @@ module Tickle
       normalized_text.gsub!(/\btonight\b/, 'this night')
       normalized_text.gsub!(/(?=\w)([ap]m|oclock)\b/, ' \1')
       normalized_text.gsub!(/\b(hence|after|from)\b/, 'future')
-      normalized_text = numericize_ordinals(normalized_text)
-    end
-
-    # Convert ordinal words to numeric ordinals (third => 3rd)
-    def numericize_ordinals(text) #:nodoc:
-      text = text.gsub(/\b(\d*)(st|nd|rd|th)\b/, '\1')
+      normalized_text
     end
 
     # Turns compound numbers, like 'twenty first' => 21
@@ -98,8 +163,10 @@ module Tickle
       if [:number, :ordinal].all? {|type| token_types.include? type}
         number = token_of_type(:number)
         ordinal = token_of_type(:ordinal)
+        combined_original = "#{number.original} #{ordinal.original}"
+        combined_word = (number.start.to_s[0] + ordinal.word)
         combined_value = (number.start.to_s[0] + ordinal.start.to_s)
-        new_number_token = Token.new(combined_value, combined_value, :ordinal, combined_value, 365)
+        new_number_token = Token.new(combined_original, combined_word, :ordinal, combined_value, 365)
         @tokens.reject! {|token| (token.type == :number || token.type == :ordinal)}
         @tokens << new_number_token
       end
@@ -108,6 +175,17 @@ module Tickle
     # Returns an array of types for all tokens
     def token_types
       @tokens.map(&:type)
+    end
+
+    protected
+
+    def get_next_month(number)
+      month = number.to_i < Date.today.day ? (Date.today.month == 12 ? 1 : Date.today.month + 1) : Date.today.month
+    end
+
+    def days_in_month(month=nil)
+      month ||= Date.today.month
+      days_in_mon = Date.civil(Date.today.year, month, -1).day
     end
   end
 
@@ -132,6 +210,12 @@ module Tickle
   # This exception is raised if an invalid argument is provided to
   # any of Tickle's methods
   class InvalidArgumentException < Exception
+
+  end
+
+  # This exception is raised if there is an issue with the parsing
+  # output from the date expression provided
+  class InvalidDateExpression < Exception
 
   end
 end
