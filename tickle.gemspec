@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Joshua Lippiner"]
-  s.date = %q{2010-05-05}
+  s.date = %q{2010-05-07}
   s.description = %q{Tickle is a date/time helper gem to help parse natural language into a recurring pattern.  Tickle is designed to be a compliment of Chronic and can interpret things such as "every 2 days, every Sunday, Sundays, Weekly, etc.}
   s.email = %q{jlippiner@noctivity.com}
   s.extra_rdoc_files = [
@@ -25,18 +25,12 @@ Gem::Specification.new do |s|
      "Rakefile",
      "SCENARIOS.rdoc",
      "VERSION",
-     "generators/USAGE",
-     "generators/ticklish_migration/templates/migration.rb",
-     "generators/ticklish_migration/ticklish_migration_generator.rb",
      "git-flow-version",
-     "init.rb",
-     "lib/acts_as_ticklish/acts_as_ticklish.rb",
      "lib/numerizer/numerizer.rb",
      "lib/tickle.rb",
      "lib/tickle/handler.rb",
      "lib/tickle/repeater.rb",
      "lib/tickle/tickle.rb",
-     "rails/init.rb",
      "test/git-flow-version",
      "test/helper.rb",
      "test/test_parsing.rb",
