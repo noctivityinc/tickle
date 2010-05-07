@@ -2,11 +2,11 @@
   http://github.com/noctivityinc/tickle
   by Joshua Lippiner, Noctivity
 
-** LEGACY WARNING
+== *LEGACY WARNING*
 
 If you starting using Tickle pre version 0.1.X, you will need to update your code to either include the :next_only => true option or read correctly from the options hash.  Sorry.
 
--- DESCRIPTION
+== DESCRIPTION
 
 Tickle is a natural language parser for recurring events.
  
@@ -14,17 +14,17 @@ Tickle is designed to be a compliment of Chronic and can interpret things such a
 
 Tickle has one main method, "Tickle.parse," which returns the next time the event should occur, at which point you simply call Tickle.parse again.   
 
--- INSTALLATION
+== INSTALLATION
 
 Tickle can be installed via RubyGems:
 
 $ gem install tickle
 
--- TINKERING
+== TINKERING
 
 Everything's at Github - http://github.com/noctivityinc/tickle
 
--- DEPENDENCIES
+== DEPENDENCIES
 
 chronic gem (gem install chronic)
 
@@ -37,31 +37,31 @@ You can parse strings containing a natural language interval using the Tickle.pa
 You can either pass a string prefixed with the word "every, each or 'on the'" or simply the time frame.   
 
 Tickle.parse returns a hash containing the following keys:
-* next = the next occurrence of the event.  This is NEVER today as its always the next date in the future.
-* starting = the date all calculations as based on.  If not passed as an option, the start date is right now.
-* until = the last date you want this event to run until.
-* expression = this is the natural language expression to store to run through tickle later to get the next occurrence.
+    * next = the next occurrence of the event.  This is NEVER today as its always the next date in the future.
+    * starting = the date all calculations as based on.  If not passed as an option, the start date is right now.
+    * until = the last date you want this event to run until.
+    * expression = this is the natural language expression to store to run through tickle later to get the next occurrence.
 
 Tickle returns nil if it cannot parse the string cannot be parsed.
 
 Tickle HEAVILY uses chronic for parsing both the event and the start date.
 
--- OPTIONS
+=== OPTIONS
 
 There are two ways to pass options: natural language or an options hash.
 
 NATURAL LANGUAGE:
-Pass a start date with the word "starting, start, stars" (e.g. Tickle.parse('every 3 days starting next friday'))
-Pass an end date with the word "until, end, ends, ending" (e.g. Tickle.parse('every 3 days until next friday'))
-Pass both at the same time (e.g. "starting May 5th repeat every other week until December 1")
+    * Pass a start date with the word "starting, start, stars" (e.g. Tickle.parse('every 3 days starting next friday'))
+    * Pass an end date with the word "until, end, ends, ending" (e.g. Tickle.parse('every 3 days until next friday'))
+    * Pass both at the same time (e.g. "starting May 5th repeat every other week until December 1")
 
 OPTIONS HASH
 Valid options are:
-* start - must be a valid date. (e.g. Tickle.parse('every other day', {:start => Date.new(2010,8,1) }))
-* until - must be a valid date. (e.g. Tickle.parse('every other day', {:until => Date.new(2010,10,1) }))
-* next_only - legacy switch to ONLY return the next occurrence as a date and not return a hash
+    * start - must be a valid date. (e.g. Tickle.parse('every other day', {:start => Date.new(2010,8,1) }))
+    * until - must be a valid date. (e.g. Tickle.parse('every other day', {:until => Date.new(2010,10,1) }))
+    * next_only - legacy switch to ONLY return the next occurrence as a date and not return a hash
 
--- SUPER IMPORTANT NOTE ABOUT NEXT OCCURRENCE & START DATE
+=== SUPER IMPORTANT NOTE ABOUT NEXT OCCURRENCE & START DATE
 
 You may notice when parsing an expression with a start date that the next occurrence IS the start date passed.  This is DESIGNED BEHAVIOR.  
 
@@ -69,7 +69,7 @@ Here's why - assume your user says "remind me every 3 weeks starting Dec 1" and 
 
 If you don't like that, fork and have fun but don't say I didn't warn ya.
 
--- EXAMPLES
+=== EXAMPLES
 
   require 'rubygems'
   require 'tickle'
@@ -153,7 +153,7 @@ WITH OPTIONS HASH
   Tickle.parse('3 months, {:until=>Thu, 07 Oct 2010}')  #=> {:next=>2010-08-08 14:01:19 -0400, :recurrence_expression=>"3 months", :starting=>2010-05-07 14:01:19 -0400, :until=>2010-10-07 00:00:00 -0400}
   .
 
--- USING IN APP
+== USING IN APP
 
 To use in your app, we recommend adding two attributes to your database model:
 * next_occurrence
@@ -165,14 +165,14 @@ code, each day, simply check to see if today is >= next_occurrence and, if so, r
 After it completes, call Tickle.parse(tickle_expression) again to update the next occurrence of the event.
 
 
--- TESTING
+== TESTING
 
 Tickle comes with a full testing suite that tests and shows sample output for simple, complex, options hash and invalid arguments.
 
 Please note, the tests were designed to output the parsed expression and not return true.  This allows (and sorry, forces you) to have to skim through the 
 results and queries to ensure they are working correctly.  You can also add your own for fun.
 
--- LIMITATIONS
+== LIMITATIONS
 
 Currently, Tickle only works for day intervals but feel free to fork and add time-based interval support or send me a note if you really want me to add it.
 
@@ -187,13 +187,13 @@ As always, BIG shout-out to the RVM Master himself, Wayne Seguin, for putting up
 
 == Note on Patches/Pull Requests
  
-* Fork the project.
-* Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
-* Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for time-based branches.
+    * Fork the project.
+    * Make your feature addition or bug fix.
+    * Add tests for it. This is important so I don't break it in a
+      future version unintentionally.
+    * Commit, do not mess with rakefile, version, or history.
+      (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
+    * Send me a pull request. Bonus points for time-based branches.
 
 == Copyright
 
