@@ -17,8 +17,8 @@ require 'tickle/tickle'
 require 'tickle/handler'
 require 'tickle/repeater'
 
-module Tickle
-  VERSION = "0.1.3"
+module Tickle #:nodoc:
+  VERSION = "0.1.4"
 
   def self.debug; false; end
 
@@ -36,7 +36,8 @@ module Tickle
   end
 end
 
-class Date
+class Date #:nodoc:
+  # returns the days in the sending month
   def days_in_month
     d,m,y = mday,month,year
     d += 1 while Date.valid_civil?(y,m,d)
@@ -44,7 +45,8 @@ class Date
   end
 end
 
-class String
+class String #:nodoc:
+  # returns true if the sending string is a text or numeric ordinal (e.g. first or 1st)
   def is_ordinal?
     scanner = %w{first second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth nineteenth twenty thirty thirtieth}
     regex = /\b(\d*)(st|nd|rd|th)\b/
@@ -52,7 +54,8 @@ class String
   end
 end
 
-class Array
+class Array #:nodoc:
+  # compares two arrays to determine if they both contain the same elements
   def same?(y)
     self.sort == y.sort
   end
