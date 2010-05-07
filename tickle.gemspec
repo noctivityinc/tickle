@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{tickle}
-  s.version = "0.1.1"
+  s.version = "0.1.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Joshua Lippiner"]
@@ -26,11 +26,11 @@ Gem::Specification.new do |s|
      "SCENARIOS.rdoc",
      "VERSION",
      "generators/USAGE",
+     "generators/ticklish_migration/templates/migration.rb",
      "generators/ticklish_migration/ticklish_migration_generator.rb",
      "git-flow-version",
      "init.rb",
      "lib/acts_as_ticklish/acts_as_ticklish.rb",
-     "lib/acts_as_ticklish/models/tickle.rb",
      "lib/numerizer/numerizer.rb",
      "lib/tickle.rb",
      "lib/tickle/handler.rb",

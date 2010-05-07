@@ -17,10 +17,8 @@ require 'tickle/tickle'
 require 'tickle/handler'
 require 'tickle/repeater'
 
-$LOAD_PATH.shift
-
 module Tickle
-  VERSION = "0.1.1"
+  VERSION = "0.1.3"
 
   def self.debug; false; end
 
