@@ -2,7 +2,7 @@
   http://github.com/noctivityinc/tickle
   by Joshua Lippiner, Noctivity
 
-** LEGACY WARNING
+== *LEGACY WARNING*
 
 If you starting using Tickle pre version 0.1.X, you will need to update your code to either include the :next_only => true option or read correctly from the options hash.  Sorry.
 
