@@ -1,6 +1,10 @@
-module Tickle
-  class << self
+module Tickle #:nodoc:
+  class << self #:nodoc:
 
+    # The heavy lifting.  Goes through each token groupings to determine what natural language should either by 
+    # parsed by Chronic or returned.  This methodology makes extension fairly simple, as new token types can be 
+    # easily added in repeater and then processed by the guess method
+    #
     def guess()
       guess_unit_types
       guess_weekday unless @next

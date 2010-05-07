@@ -1,6 +1,38 @@
-module Tickle
-  class << self
+# Copyright (c) 2010 Joshua Lippiner
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+module Tickle  #:nodoc:
+  class << self #:nodoc:
+    # == Configuration options
+    #
+    # * +start+ - start date for future occurrences.  Must be in valid date format.
+    # * +until+ - last date to run occurrences until.  Must be in valid date format.
+    # 
+    #  Use by calling Tickle.parse and passing natural language with or without options.
+    #      
+    #  def get_next_occurrence
+    #      results = Tickle.parse('every Wednesday starting June 1st until Dec 15th')
+    #      return results[:next] if results
+    #  end
+    #
     def parse(text, specified_options = {})
       # get options and set defaults if necessary
       default_options = {:start => Time.now, :next_only => false, :until  => nil}
@@ -59,10 +91,7 @@ module Tickle
       if !best_guess
         return nil
       elsif options[:next_only] != true
-        h = {:next => best_guess.to_time, :recurrence_expression => event.strip}
-        h.merge!({:starting => @start.to_time}) if @start
-        h.merge!({:until => @until.to_time}) if @until
-        return h
+        return {:next => best_guess.to_time, :expression => event.strip, :starting => @start, :until => @until}
       else
         return best_guess
       end
@@ -86,14 +115,11 @@ module Tickle
         event, ending = process_for_ending(text)
       end
 
-      @start = (starting && Tickle.parse(pre_filter(starting), {:next_only => true}) || options[:start])
+      @start = (starting && Tickle.parse(pre_filter(starting), {:next_only => true}) || options[:start]).to_time
       @until = (ending && Tickle.parse(pre_filter(ending), {:next_only => true})  || options[:until])
+      @until = @until.to_time if @until
       @next = nil
       return event
-    end
-
-    def inspect_matches
-
     end
 
     # process the remaining expression to see if an until, end, ending is specified
@@ -179,10 +205,15 @@ module Tickle
 
     protected
 
+    # Returns the next available month based on the current day of the month.
+    # For example, if get_next_month(15) is called and today is the 10th, then it will return the 15th of this month.
+    # However, if get_next_month(15) is called and today is the 18th, it will return the 15th of next month.
     def get_next_month(number)
       month = number.to_i < Date.today.day ? (Date.today.month == 12 ? 1 : Date.today.month + 1) : Date.today.month
     end
 
+    # Return the number of days in a specified month.
+    # If no month is specified, current month is used.
     def days_in_month(month=nil)
       month ||= Date.today.month
       days_in_mon = Date.civil(Date.today.year, month, -1).day
@@ -200,6 +231,7 @@ module Tickle
       @start = start
     end
 
+    # Updates an existing token.  Mostly used by the repeater class.
     def update(type, start=nil, interval=nil)
       @start = start
       @type = type
@@ -210,12 +242,10 @@ module Tickle
   # This exception is raised if an invalid argument is provided to
   # any of Tickle's methods
   class InvalidArgumentException < Exception
-
   end
 
   # This exception is raised if there is an issue with the parsing
   # output from the date expression provided
   class InvalidDateExpression < Exception
-
   end
 end
