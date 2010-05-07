@@ -80,22 +80,24 @@ class TestParsing < Test::Unit::TestCase
     puts "Time.now"
     p Time.now
 
-    parse_now('starting Monday repeat every month')
-    parse_now('starting May 13th repeat every week')
-    parse_now('starting May 13th repeat every other day')
+    parse_now('starting today and ending one week from now') # => demonstrates leaving out the actual time period and implying it as daily
 
-    parse_now('every week starts this wednesday')
-    parse_now('every other day starts the 1st May')
-    parse_now('every other day starting May 6')
-    parse_now('every week starting this wednesday')
-    parse_now('every other day starting the 1st May')
-
-    parse_now("every other day starting May 1st #{Date.today.year + 1}")
-    parse_now('every other week starting this Sunday')
-
-    parse_now('every week starting this wednesday until June 5th')
-    parse_now('every week starting this wednesday ends June 5th')
-    parse_now('every week starting this wednesday ending June 5th')
+    # parse_now('starting Monday repeat every month')
+    # parse_now('starting May 13th repeat every week')
+    # parse_now('starting May 13th repeat every other day')
+    # 
+    # parse_now('every week starts this wednesday')
+    # parse_now('every other day starts the 1st May')
+    # parse_now('every other day starting May 6')
+    # parse_now('every week starting this wednesday')
+    # parse_now('every other day starting the 1st May')
+    # 
+    # parse_now("every other day starting May 1st #{Date.today.year + 1}")
+    # parse_now('every other week starting this Sunday')
+    # 
+    # parse_now('every week starting this wednesday until June 5th')
+    # parse_now('every week starting this wednesday ends June 5th')
+    # parse_now('every week starting this wednesday ending June 5th')
 
   end
 
