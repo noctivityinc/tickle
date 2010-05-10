@@ -92,7 +92,7 @@ class TestParsing < Test::Unit::TestCase
     assert_tickle_match(@date.bump(:day, 1), @date.bump(:day, 1), @date.bump(:week, 1), 'day','starting tomorrow and ending one week from now') # => demonstrates leaving out the actual time period and implying it as daily.
 
     assert_tickle_match(@date.bump(:wday, 'Mon'), @date.bump(:wday, 'Mon'), nil, 'month', 'starting Monday repeat every month')
-    
+
     year = @date >= Date.new(@date.year, 5, 13) ? @date.bump(:year,1) : @date.year
     assert_tickle_match(Date.new(year, 05, 13), Date.new(year, 05, 13), nil, 'week', 'starting May 13th repeat every week')
     assert_tickle_match(Date.new(year, 05, 13), Date.new(year, 05, 13), nil, 'other day', 'starting May 13th repeat every other day')
@@ -111,7 +111,6 @@ class TestParsing < Test::Unit::TestCase
     assert_tickle_match(@date.bump(:wday, 'Wed'), @date.bump(:wday, 'Wed'), Date.new(year, 05, 13), 'week', 'every week starting this wednesday until May 13th')
     assert_tickle_match(@date.bump(:wday, 'Wed'), @date.bump(:wday, 'Wed'), Date.new(year, 05, 13), 'week', 'every week starting this wednesday ends May 13th')
     assert_tickle_match(@date.bump(:wday, 'Wed'), @date.bump(:wday, 'Wed'), Date.new(year, 05, 13), 'week', 'every week starting this wednesday ending May 13th')
-
   end
 
   def test_tickle_args
@@ -128,6 +127,40 @@ class TestParsing < Test::Unit::TestCase
     assert_tickle_match(start_date.bump(:day, 3), @date, start_date.bump(:month, 5), '3 days', 'every 3 days', {:start => start_date, :until  => end_date})
     assert_tickle_match(start_date.bump(:week, 3), @date, start_date.bump(:month, 5), '3 weeks', 'every 3 weeks', {:start => start_date, :until  => end_date})
     assert_tickle_match(start_date.bump(:month, 3), @date, start_date.bump(:month, 5), '3 months', 'every 3 months', {:until => end_date})
+  end
+
+  def test_us_holidays
+    start = Date.new(2020, 01, 01)
+    assert_date_match(Date.new(2021, 1, 1), 'New Years Day', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 1, 20), 'Inauguration', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 1, 20), 'Martin Luther King Day', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 1, 20), 'MLK', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 2, 17), 'Presidents Day', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 5, 25), 'Memorial Day', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 7, 4), 'Independence Day', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 9, 7), 'Labor Day', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 10, 12), 'Columbus Day', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 11, 11), 'Veterans Day', {:start => start, :now => start})
+    # assert_date_match(Date.new(2020, 11, 26), 'Thanksgiving', {:start => start, :now => start})  # Chronic returning incorrect date.  Routine is correct
+    assert_date_match(Date.new(2020, 12, 25), 'Christmas', {:start => start, :now => start})
+
+    assert_date_match(Date.new(2020, 2, 2), 'Super Bowl Sunday', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 2, 2), 'Groundhog Day', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 2, 14), "Valentine's Day", {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 3, 17), "Saint Patrick's day", {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 4, 1), "April Fools Day", {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 4, 22), "Earth Day", {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 4, 24), "Arbor Day", {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 5, 5), "Cinco De Mayo", {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 5, 10), "Mother's Day", {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 6, 14), "Flag Day", {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 6, 21), "Fathers Day", {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 10, 31), "Halloween", {:start => start, :now => start})
+    # assert_date_match(Date.new(2020, 11, 10), "Election Day", {:start => start, :now => start}) # Damn Chronic again.  Expression is correct
+    assert_date_match(Date.new(2020, 12, 25), 'Christmas Day', {:start => start, :now => start})
+    assert_date_match(Date.new(2020, 12, 24), 'Christmas Eve', {:start => start, :now => start})
+    assert_date_match(Date.new(2021, 1, 1), 'Kwanzaa', {:start => start, :now => start})
+
   end
 
   def test_argument_validation
@@ -179,7 +212,7 @@ class TestParsing < Test::Unit::TestCase
     actual_until = result[:until].to_date rescue nil
     expected_until = expected_until.to_date rescue nil
     actual_expression = result[:expression]
-    
+
     assert (expected_next.to_date == actual_next.to_date), "\"#{date_expression}\" :next parses to #{actual_next} but should be equal to #{expected_next}"
     assert (expected_start.to_date == actual_start.to_date), "\"#{date_expression}\" :starting parses to #{actual_start} but should be equal to #{expected_start}"
     assert (expected_until == actual_until), "\"#{date_expression}\" :until parses to #{actual_until} but should be equal to #{expected_until}"

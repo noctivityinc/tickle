@@ -43,6 +43,8 @@ module Tickle #:nodoc:
       @next = @start.bump(:week, token_of_type(:number).interval) if token_types.same?([:number, :week])
       @next = @start.bump(:month, token_of_type(:number).interval) if token_types.same?([:number, :month])
       @next = @start.bump(:year, token_of_type(:number).interval) if token_types.same?([:number, :year])
+      @next = chronic_parse_with_start("#{token_of_type(:month_name).word} #{token_of_type(:number).start}") if token_types.same?([:number, :month_name])
+      @next = chronic_parse_with_start("#{token_of_type(:specific_year).word}-#{token_of_type(:month_name).start}-#{token_of_type(:number).start}") if token_types.same?([:number, :month_name, :specific_year])
     end
 
     def guess_ordinal

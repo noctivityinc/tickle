@@ -52,7 +52,7 @@ module Tickle  #:nodoc:
 
       # check to see if this event starts some other time and reset now
       event = scan_expression(text, options)
-      
+
       Tickle.dwrite("start: #{@start}, until: #{@until}, now: #{options[:now].to_date}")
 
       # => ** this is mostly for testing. Bump by 1 day if today (or in the past for testing)
@@ -173,6 +173,7 @@ module Tickle  #:nodoc:
       text.gsub!(/on the(\s)?/, '')
       text.gsub!(/([^\w\d\s])+/, '')
       text.downcase.strip
+      text = normalize_us_holidays(text)
     end
 
     # Split the text on spaces and convert each word into
@@ -197,21 +198,40 @@ module Tickle  #:nodoc:
       normalized_text = Numerizer.numerize(normalized_text)
       normalized_text.gsub!(/['"\.]/, '')
       normalized_text.gsub!(/([\/\-\,\@])/) { ' ' + $1 + ' ' }
-      # normalized_text.gsub!(/\btoday\b/, 'this day')
-      # normalized_text.gsub!(/\btomm?orr?ow\b/, 'next day')
-      # normalized_text.gsub!(/\byesterday\b/, 'last day')
-      # normalized_text.gsub!(/\bnoon\b/, '12:00')
-      # normalized_text.gsub!(/\bmidnight\b/, '24:00')
-      # normalized_text.gsub!(/\bbefore now\b/, 'past')
-      # normalized_text.gsub!(/\bnow\b/, 'this second')
-      # normalized_text.gsub!(/\b(ago|before)\b/, 'past')
-      # normalized_text.gsub!(/\bthis past\b/, 'last')
-      # normalized_text.gsub!(/\bthis last\b/, 'last')
-      # normalized_text.gsub!(/\b(?:in|during) the (morning)\b/, '\1')
-      # normalized_text.gsub!(/\b(?:in the|during the|at) (afternoon|evening|night)\b/, '\1')
-      # normalized_text.gsub!(/\btonight\b/, 'this night')
-      # normalized_text.gsub!(/(?=\w)([ap]m|oclock)\b/, ' \1')
-      # normalized_text.gsub!(/\b(hence|after|from)\b/, 'future')
+      normalized_text
+    end
+
+    # Converts natural language US Holidays into a date expression to be
+    # parsed.
+    def normalize_us_holidays(text) #:nodoc:
+      normalized_text = text.to_s.downcase
+      normalized_text.gsub!(/\bnew\syear'?s?(\s)?(day)?\b/, "january 1, #{next_appropriate_year(1, 1)}")
+      normalized_text.gsub!(/\bnew\syear'?s?(\s)?(eve)?\b/, "december 31, #{next_appropriate_year(12, 31)}")
+      normalized_text.gsub!(/\bm(artin\s)?l(uther\s)?k(ing)?(\sday)?\b/, 'third monday in january')
+      normalized_text.gsub!(/\binauguration(\sday)?\b/, 'january 20')
+      normalized_text.gsub!(/\bpresident'?s?(\sday)?\b/, 'third monday in february')
+      normalized_text.gsub!(/\bmemorial\sday\b/, '4th monday of may')
+      normalized_text.gsub!(/\bindepend(e|a)nce\sday\b/, "july 4, #{next_appropriate_year(7, 4)}")
+      normalized_text.gsub!(/\blabor\sday\b/, 'first monday in september')
+      normalized_text.gsub!(/\bcolumbus\sday\b/, 'second monday in october')
+      normalized_text.gsub!(/\bveterans?\sday\b/, "november 11, #{next_appropriate_year(11, 1)}")
+      normalized_text.gsub!(/\bthanksgiving(\sday)?\b/, 'fourth thursday in november')
+      normalized_text.gsub!(/\bchristmas\seve\b/, "december 24, #{next_appropriate_year(12, 24)}")
+      normalized_text.gsub!(/\bchristmas(\sday)?\b/, "december 25, #{next_appropriate_year(12, 25)}")
+      normalized_text.gsub!(/\bsuper\sbowl(\ssunday)?\b/, 'first sunday in february')
+      normalized_text.gsub!(/\bgroundhog(\sday)?\b/, "february 2, #{next_appropriate_year(2, 2)}")
+      normalized_text.gsub!(/\bvalentine'?s?(\sday)?\b/, "february 14, #{next_appropriate_year(2, 14)}")
+      normalized_text.gsub!(/\bs(ain)?t\spatrick'?s?(\sday)?\b/, "march 17, #{next_appropriate_year(3, 17)}")
+      normalized_text.gsub!(/\bapril\sfool'?s?(\sday)?\b/, "april 1, #{next_appropriate_year(4, 1)}")
+      normalized_text.gsub!(/\bearth\sday\b/, "april 22, #{next_appropriate_year(4, 22)}")
+      normalized_text.gsub!(/\barbor\sday\b/, 'fourth friday in april')
+      normalized_text.gsub!(/\bcinco\sde\smayo\b/, "may 5, #{next_appropriate_year(5, 5)}")
+      normalized_text.gsub!(/\bmother'?s?\sday\b/, 'second sunday in may')
+      normalized_text.gsub!(/\bflag\sday\b/, "june 14, #{next_appropriate_year(6, 14)}")
+      normalized_text.gsub!(/\bfather'?s?\sday\b/, 'third sunday in june')
+      normalized_text.gsub!(/\bhalloween\b/, "october 31, #{next_appropriate_year(10, 31)}")
+      normalized_text.gsub!(/\belection\sday\b/, 'second tuesday in november')
+      normalized_text.gsub!(/\bkwanzaa\b/, "january 1, #{next_appropriate_year(1, 1)}")
       normalized_text
     end
 
@@ -241,6 +261,11 @@ module Tickle  #:nodoc:
     # However, if get_next_month(15) is called and the start date is the 18th, it will return the 15th of next month.
     def get_next_month(number)
       month = number.to_i < @start.day ? (@start.month == 12 ? 1 : @start.month + 1) : @start.month
+    end
+
+    def next_appropriate_year(month, day)
+      year = (Date.new(@start.year.to_i, month.to_i, day.to_i) == @start.to_date) ? @start.year + 1 : @start.year
+      return year
     end
 
     # Return the number of days in a specified month.
