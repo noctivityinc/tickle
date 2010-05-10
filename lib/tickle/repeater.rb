@@ -47,7 +47,7 @@ class Tickle::Repeater < Chronic::Tag #:nodoc:
     scanner.keys.each do |scanner_item|
       if scanner_item =~ token.original
         token.word = scanner[scanner_item]
-        token.update(:ordinal, numericize_ordinals(scanner[scanner_item]), Tickle.days_in_month(Tickle.get_next_month(numericize_ordinals(scanner[scanner_item]))))
+        token.update(:ordinal, scanner[scanner_item].ordinal_as_number, Tickle.days_in_month(Tickle.get_next_month(scanner[scanner_item].ordinal_as_number)))
       end
     end
     token
@@ -57,24 +57,24 @@ class Tickle::Repeater < Chronic::Tag #:nodoc:
     regex = /\b(\d*)(st|nd|rd|th)\b/
     if token.original =~ regex
       token.word = token.original
-      token.update(:ordinal, numericize_ordinals(token.word), Tickle.days_in_month(Tickle.get_next_month(token.word)))
+      token.update(:ordinal, token.word.ordinal_as_number, Tickle.days_in_month(Tickle.get_next_month(token.word)))
     end
     token
   end
 
   def self.scan_for_month_names(token)
-    scanner = {/^jan\.?(uary)?$/ => :january,
-      /^feb\.?(ruary)?$/ => :february,
-      /^mar\.?(ch)?$/ => :march,
-      /^apr\.?(il)?$/ => :april,
-      /^may$/ => :may,
-      /^jun\.?e?$/ => :june,
-      /^jul\.?y?$/ => :july,
-      /^aug\.?(ust)?$/ => :august,
-      /^sep\.?(t\.?|tember)?$/ => :september,
-      /^oct\.?(ober)?$/ => :october,
-      /^nov\.?(ember)?$/ => :november,
-    /^dec\.?(ember)?$/ => :december}
+    scanner = {/^jan\.?(uary)?$/ => 1,
+      /^feb\.?(ruary)?$/ => 2,
+      /^mar\.?(ch)?$/ => 3,
+      /^apr\.?(il)?$/ => 4,
+      /^may$/ => 5,
+      /^jun\.?e?$/ => 6,
+      /^jul\.?y?$/ => 7,
+      /^aug\.?(ust)?$/ => 8,
+      /^sep\.?(t\.?|tember)?$/ => 9,
+      /^oct\.?(ober)?$/ => 10,
+      /^nov\.?(ember)?$/ => 11,
+    /^dec\.?(ember)?$/ => 12}
     scanner.keys.each do |scanner_item|
       token.update(:month_name, scanner[scanner_item], 30) if scanner_item =~ token.word
     end
@@ -130,11 +130,6 @@ class Tickle::Repeater < Chronic::Tag #:nodoc:
       end
     end
     token
-  end
-
-  # Convert ordinal words to numeric ordinals (third => 3rd)
-  def self.numericize_ordinals(text) #:nodoc:
-    text = text.gsub(/\b(\d*)(st|nd|rd|th)\b/, '\1')
   end
 
 
